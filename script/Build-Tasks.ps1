@@ -22,12 +22,18 @@ task -name Build -description "builds outdated source files" -action {
 	Exec {
 			msbuild $srcFolder/$solutionName /t:Build "/p:Configuration=$config" /v:minimal /nologo
 	}
+     if ($lastExitCode -ne 0) {
+        throw "Error: Build Task failed"
+    }
 };
 
 task -name Clean -description "deletes all build artifacts" -action {
 	Exec {
 		msbuild $srcFolder/$solutionName /t:Clean
 	}
+     if ($lastExitCode -ne 0) {
+        throw "Error: Build Task failed"
+    }
 };
 
 task -name BumpVersion -depends Build -description "bumps the version of the assemblies" -action {
