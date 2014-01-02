@@ -10,6 +10,7 @@ using Deerso.Domain.Models;
 using Moq;
 using Ploeh.AutoFixture;
 using System.Web.Mvc;
+using Deerso.Domain.Websites;
 
 namespace Deerso.TestHelpers
 {
@@ -34,8 +35,8 @@ namespace Deerso.TestHelpers
             mockUow = new Mock<IDeersoWebUnitOfWork>();
 
             //Addresses
-            var mockAddressRepo = new Mock<IRepository<Address>>();
-            mockAddressRepo.Setup(i => i.GetById(It.IsAny<int>())).Returns(fixture.Create<Address>());
+            var mockAddressRepo = new Mock<IRepository<Domain.Models.Address>>();
+            mockAddressRepo.Setup(i => i.GetById(It.IsAny<int>())).Returns(fixture.Create<Domain.Models.Address>());
             mockUow.SetupGet(i => i.Addresses).Returns(mockAddressRepo.Object);
 
 
@@ -48,12 +49,12 @@ namespace Deerso.TestHelpers
 
             //Customers
             var mockCustomersRepo = new Mock<ICustomerRepository>();
-            fixture.Customize<Customer>(c => c.With(i => i.Orders, This.MockOrders(3)));
+            fixture.Customize<Domain.Models.Customer>(c => c.With(i => i.Orders, This.MockOrders(3)));
             //GetById, GetByUserId returns our mock customer
-            mockCustomersRepo.Setup(i => i.GetById(It.IsAny<int>())).Returns(fixture.Create<Customer>());
-            mockCustomersRepo.Setup(i => i.GetByUserId(It.IsAny<Guid>())).Returns(fixture.Create<Customer>());
+            mockCustomersRepo.Setup(i => i.GetById(It.IsAny<int>())).Returns(fixture.Create<Domain.Models.Customer>());
+            mockCustomersRepo.Setup(i => i.GetByUserId(It.IsAny<Guid>())).Returns(fixture.Create<Domain.Models.Customer>());
             //Get all returns our mock customer as a queryable
-            mockCustomersRepo.Setup(i => i.GetAll()).Returns(fixture.CreateMany<Customer>().AsQueryable());
+            mockCustomersRepo.Setup(i => i.GetAll()).Returns(fixture.CreateMany<Domain.Models.Customer>().AsQueryable());
             mockUow.SetupGet(i => i.Customers).Returns(mockCustomersRepo.Object);
 
             return mockUow;
@@ -74,6 +75,7 @@ namespace Deerso.TestHelpers
                 .Returns((Expression<Func<T, bool>> x) => mockData.Where(x.Compile()).AsQueryable());
             return mock;
         }
+
 
         public static Fixture Fixture(this IHelpTestDeerso This)
         {
@@ -151,7 +153,7 @@ namespace Deerso.TestHelpers
             mockPis.Setup(i => i.GetShippingMethodSelectItems())
                 .Returns(new List<SelectListItem> {new SelectListItem {Text = "MockShipMethod", Value = "MockValue"}});
             mockPis.Setup(i => i.GetImagesForProduct(It.IsAny<string>()))
-                .Returns(fixture.CreateMany<ItemImages>().ToList());
+                .Returns(fixture.CreateMany<ProductImage>().ToList());
 
 
             return mockPis;
@@ -178,7 +180,7 @@ namespace Deerso.TestHelpers
             for (var i = 0; i < count; i++)
             {
                 var orderDetails = fixture.CreateMany<OrderDetail>().ToArray();
-                orders[i].Trackings = new List<Tracking> {fixture.Create<Tracking>()};
+                orders[i].Trackings = new List<Deerso.Domain.Models.Tracking> {fixture.Create<Domain.Models.Tracking>()};
                 orders[i].OrderDetails = orderDetails;
             }
 
