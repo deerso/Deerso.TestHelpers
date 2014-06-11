@@ -1,0 +1,209 @@
+# Notes:
+#   - Minimal appveyor.yml file is an empty file. All sections are optional.
+#   - Indent each level of configuration with 2 spaces. Do not use tabs!
+#   - All section names are case-sensitive.
+#   - Section names should be unique on each level.
+
+#---------------------------------#
+#      general configuration      #
+#---------------------------------#
+
+# version format
+version: 1.0.{build}
+
+# branches to build
+#branches:
+  # whitelist
+  #only:
+  #  - master
+  #  - production
+
+  # blacklist
+  #except:
+  #  - gh-pages
+
+#---------------------------------#
+#    environment configuration    #
+#---------------------------------#
+
+# Operating system (build VM template)
+os: Windows Server 2012 R2
+
+# scripts that are called at very beginning, before repo cloning
+init:
+  - git config --global core.autocrlf input
+
+# setting up etc\hosts file
+#hosts:
+#  queue-server: 127.0.0.1
+#  db.server.com: 127.0.0.2
+
+# environment variables
+environment:
+  nuget_user:
+    secure: kcILZ9kY85AEODmx67BKIg==
+  nuget_password:
+    secure: W6kj49elSGUgt7lIUpkDIw==
+  nuget_user_2:
+    secure: SkW8/1YbthJlhPRX7h8K6pX7zf3Z4pUrZ7ChtnDfZCk=
+  nuget_password_2:
+    secure: nEK12zhLpk5oOYjIoSJayw==
+
+#  matrix:
+#  - db: mysql
+#    provider: mysql
+#
+#  - db: mssql
+#    provider: mssql
+#    password:
+#      secure: $#(JFDA)jQ@#$
+
+# this is how to allow failing jobs in the matrix
+#matrix:
+#  allow_failures:
+#    - platform: x86
+#      configuration: Debug
+#    - platform: x64
+#      configuration: Release
+
+# enable service required for build/tests
+#services:
+#  - iis                 # start IIS
+#  - msmq                # start Queuing services
+
+# scripts that run after cloning repository
+install:
+  - nuget sources add -Name "Deerso Azure NuGet Server" -Source http://deersobuildserver1.cloudapp.net/httpAuth/app/nuget/v1/FeedService.svc/ -UserName %nuget_user% -Password %nuget_password%
+  - nuget sources add -Name "Deerso Appveyor NuGet Server" -Source https://ci.appveyor.com/nuget/wilburz-1bd0xh3y31tw -UserName %nuget_user_2% -Password %nuget_password_2%
+
+
+#---------------------------------#
+#       build configuration       #
+#---------------------------------#
+
+# to add several configurations to build matrix:
+configuration:
+  - Release
+
+build:
+  project: src/Deerso.TestHelpers.sln
+  publish_nuget: true
+
+  # MSBuild verbosity level
+  verbosity: minimal
+
+
+# scripts to run before build
+before_build:
+  - nuget restore src/Deerso.TestHelpers.sln
+
+# scripts to run after build
+#after_build:
+
+# to run your custom scripts instead of automatic MSBuild
+#build_script:
+
+# to disable automatic builds
+#build: off
+
+#---------------------------------#
+#       tests configuration       #
+#---------------------------------#
+
+#test:
+#  assemblies:
+#    - asm1.dll
+#    - asm2.dll
+#
+#  categories:
+#    - UI
+#    - E2E
+
+## to run tests from different categories as separate jobs in parallel
+#test:
+#  categories:
+#    - A            # A category common for all jobs
+#    - [UI]         # 1st job
+#    - [DAL, BL]    # 2nd job
+
+## scripts to run before tests
+##before_test:
+#  - echo script1
+#  - ps: Write-Host "script1"
+
+## scripts to run after tests
+#after_test:
+
+## to run your custom scripts instead of automatic tests
+##test_script:
+##  - echo This is my custom test script
+
+## to disable automatic tests
+#test: off
+
+
+#---------------------------------#
+#      artifacts configuration    #
+#---------------------------------#
+
+#artifacts:
+#
+#  # pushing a single file
+#  - path: test.zip
+#
+#  # pushing a single file with environment variable in path and "Deployment name" specified
+#  - path: MyProject\bin\$(configuration)
+#    name: myapp
+#
+#  # pushing entire folder as a zip archive
+#  - path: logs
+#
+#  # pushing all *.nupkg files in directory
+#  - path: out\*.nupkg
+
+
+#---------------------------------#
+#     deployment configuration    #
+#---------------------------------#
+
+# providers: Local, FTP, WebDeploy, AzureCS, AzureBlob, S3, NuGet, Environment
+# provider name are case-sensitive!
+#deploy:
+#  - provider: Environment
+
+# scripts to run before deployment
+#before_deploy:
+
+# scripts to run after deployment
+#after_deploy:
+
+# to run your custom scripts instead of provider deployments
+# deploy_script:
+
+# to disable deployment
+#deploy: off
+
+#---------------------------------#
+#        global handlers          #
+#---------------------------------#
+
+## on successful build
+#on_success:
+#  - do something
+
+## on build failure
+#on_failure:
+#  - do something
+
+ 
+#---------------------------------#
+#         notifications           #
+#---------------------------------#
+ 
+notifications:
+
+  # HipChat
+  - provider: HipChat
+    auth_token:
+      secure: 4FIkwWtm9H8sCwSCXskO5CEHzyOKcLVbv5CrOY7P0+4=
+    room: Developer Notifications
